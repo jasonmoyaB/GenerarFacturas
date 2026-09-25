@@ -32,7 +32,7 @@ arquitecto ──(02 cerrado)──▶ SeniorDev ──(rama feat/fN lista)─�
 
 Orden por riesgo: el .docx (F2) va temprano porque es lo más difícil de dejar exacto.
 
-- [ ] **F0 Scaffold** — `git init`, Vite React (JS), dep `docx@^9.7`, `"type": "module"`, scripts npm, `.gitignore` (node_modules, dist, out). DoD: `npm run dev` levanta; `npm test` corre (aunque sin tests).
+- [x] **F0 Scaffold** — `git init`, Vite React (JS), dep `docx@^9.7`, `"type": "module"`, scripts npm, `.gitignore` (node_modules, dist, out). DoD: `npm run dev` levanta; `npm test` corre (aunque sin tests).
 - [ ] **F1 Core** — `src/core/*` + `tests/core.test.js`. DoD: `npm test` verde con los casos mínimos de 02 §7; ejemplo suma ₡300.000,00; `core/` sin imports de otras capas.
 - [ ] **F2 Documento** — `src/docx/*`, `scripts/embed-logo.mjs`, `scripts/test-docx.mjs`, `js/logo-data.js`. DoD: `out/ejemplo.docx` abre en Word/LibreOffice; PDF = 1 página; funciona con logo y con `logo = null` (A14); propiedades de 02 §6 presentes.
 - [ ] **F3 Estado** — `state/reducer.js`, `state/useProforma.js`, `platform/storage.js`. DoD: recargar no pierde datos; Nueva proforma cumple spec §6 y 02 §5 (counter, validaHastaManual); storage corrupto no rompe la app.
@@ -68,7 +68,7 @@ Handoff → `pr-review` ("feat/fN lista para PR").
 | Fase | Dev | CleanCode | PR | Merge |
 |------|-----|-----------|----|-------|
 | Arquitectura | — | — | — | [x] |
-| F0 | [ ] | [ ] | [ ] | [ ] |
+| F0 | [x] | [x] | [x] | [x] |
 | F1 | [ ] | [ ] | [ ] | [ ] |
 | F2 | [ ] | [ ] | [ ] | [ ] |
 | F3 | [ ] | [ ] | [ ] | [ ] |
