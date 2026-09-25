@@ -68,7 +68,7 @@ Handoff → `pr-review` ("feat/fN lista para PR").
 | Fase | Dev | CleanCode | PR | Merge |
 |------|-----|-----------|----|-------|
 | Arquitectura | — | — | — | [x] |
-| F0 | [x] | [x] | [ ] | [ ] |
+| F0 | [x] | [x] | [x] | [x] |
 | F1 | [ ] | [ ] | [ ] | [ ] |
 | F2 | [ ] | [ ] | [ ] | [ ] |
 | F3 | [ ] | [ ] | [ ] | [ ] |
