@@ -1,4 +1,4 @@
-// Valores por defecto y proforma de ejemplo. Sin imports: lo usan proforma.js y la UI.
+// Valores por defecto y proforma de ejemplo. Sin imports en runtime: proforma.js importa de aquí y un import inverso crearía un ciclo.
 
 /** @type {import('./proforma.js').Emisor} */
 export const EMISOR_DEFAULT = {
