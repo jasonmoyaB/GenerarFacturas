@@ -34,6 +34,8 @@ react + vite
 6. "Nueva proforma": siguiente consecutivo, limpia cliente y líneas, conserva emisor,
    logo, comentario e incluye/no incluye.
 7. Guardar borrador automáticamente (debounce 400 ms) para no perder datos al recargar.
+8. Historial local: registrar al descargar o imprimir una proforma válida, actualizar por
+   número de documento, conservar las 50 más recientes y permitir restaurar o eliminar.
 
 # ESPECIFICACIONES DEL DOCUMENTO (exacto)
 - Carta 12240 × 15840 DXA, márgenes 1440, Arial, base 8 pt, solo blanco y negro.

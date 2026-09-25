@@ -6,6 +6,7 @@ import { formatNumero, nextCounter } from '../src/core/numbering.js';
 import { createProforma, nuevaProforma, lineAmount, total, validate, fileName } from '../src/core/proforma.js';
 import { toViewModel, logoSize } from '../src/core/view-model.js';
 import { EMISOR_DEFAULT, EJEMPLO } from '../src/core/defaults.js';
+import { reducer } from '../src/state/reducer.js';
 
 const linea = (o) => ({ id: 'x', titulo: 'Algo', descripcion: '', cantidad: '1', precio: '100', ...o });
 
@@ -100,4 +101,49 @@ test('toViewModel: textos listos para imprimir', () => {
   assert.deepEqual(vm.incluye, ['a', 'b', 'c']);
   const vacio = toViewModel({ ...EJEMPLO, cliente: { ...EJEMPLO.cliente, contacto: ' ' } }, EMISOR_DEFAULT);
   assert.equal(vacio.cliente.contacto, '[____]');
+});
+
+test('reducer: fechas, edición y nueva proforma', () => {
+  const base = {
+    proforma: { ...EJEMPLO, fechaEmision: '2026-09-25', validaHasta: '2026-10-10' },
+    emisor: EMISOR_DEFAULT,
+    counter: { year: 2026, seq: 1 },
+    logo: null,
+    logoCustom: false,
+    history: [],
+    errors: { viejo: 'error' },
+  };
+  const fecha = reducer(base, { type: 'proforma/campo', name: 'fechaEmision', value: '2026-10-01' });
+  assert.equal(fecha.proforma.validaHasta, '2026-10-16');
+  const manual = reducer(fecha, { type: 'proforma/validaHasta', value: '2026-12-01' });
+  const sinCambio = reducer(manual, { type: 'proforma/campo', name: 'fechaEmision', value: '2026-11-01' });
+  assert.equal(sinCambio.proforma.validaHasta, '2026-12-01');
+  const nueva = reducer(sinCambio, { type: 'nueva', hoy: '2026-11-02' });
+  assert.equal(nueva.proforma.numero, 'PROF-2026-002');
+  assert.equal(nueva.proforma.validaHastaManual, false);
+  assert.equal(nueva.proforma.cliente.nombre, '');
+  assert.deepEqual(nueva.errors, {});
+});
+
+test('reducer: historial guarda, actualiza, restaura y elimina', () => {
+  const base = {
+    proforma: EJEMPLO,
+    emisor: EMISOR_DEFAULT,
+    counter: { year: 2026, seq: 1 },
+    logo: null,
+    logoCustom: false,
+    history: [],
+    errors: {},
+  };
+  const saved = reducer(base, { type: 'historial/guardar', id: 'h1', savedAt: '2026-09-25T10:00:00Z' });
+  assert.equal(saved.history.length, 1);
+  assert.equal(saved.history[0].proforma.numero, 'PROF-2026-001');
+  const changed = { ...saved, proforma: { ...EJEMPLO, cliente: { ...EJEMPLO.cliente, nombre: 'Nuevo cliente' } } };
+  const updated = reducer(changed, { type: 'historial/guardar', id: 'h2', savedAt: '2026-09-25T11:00:00Z' });
+  assert.equal(updated.history.length, 1);
+  assert.equal(updated.history[0].id, 'h1');
+  assert.equal(updated.history[0].proforma.cliente.nombre, 'Nuevo cliente');
+  const restored = reducer({ ...updated, proforma: { ...EJEMPLO, numero: 'OTRA' } }, { type: 'historial/restaurar', record: updated.history[0] });
+  assert.equal(restored.proforma.numero, 'PROF-2026-001');
+  assert.equal(reducer(restored, { type: 'historial/eliminar', id: 'h1' }).history.length, 0);
 });

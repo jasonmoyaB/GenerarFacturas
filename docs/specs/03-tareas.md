@@ -34,11 +34,11 @@ Orden por riesgo: el .docx (F2) va temprano porque es lo más difícil de dejar 
 
 - [x] **F0 Scaffold** — `git init`, Vite React (JS), dep `docx@^9.7`, `"type": "module"`, scripts npm, `.gitignore` (node_modules, dist, out). DoD: `npm run dev` levanta; `npm test` corre (aunque sin tests).
 - [x] **F1 Core** — `src/core/*` + `tests/core.test.js`. DoD: `npm test` verde con los casos mínimos de 02 §7; ejemplo suma ₡300.000,00; `core/` sin imports de otras capas.
-- [ ] **F2 Documento** — `src/docx/*`, `scripts/embed-logo.mjs`, `scripts/test-docx.mjs`, `js/logo-data.js`. DoD: `out/ejemplo.docx` abre en Word/LibreOffice; PDF = 1 página; funciona con logo y con `logo = null` (A14); propiedades de 02 §6 presentes.
-- [ ] **F3 Estado** — `state/reducer.js`, `state/useProforma.js`, `platform/storage.js`. DoD: recargar no pierde datos; Nueva proforma cumple spec §6 y 02 §5 (counter, validaHastaManual); storage corrupto no rompe la app.
-- [ ] **F4 UI** — form, `LineasEditor`, `LogoField` + `platform/logo-bw.js`, `Preview`, `Toolbar`, validación con `aria-invalid`, descarga. DoD: vista previa en vivo = .docx; nombre de archivo correcto; logo subido queda en blanco y negro y persiste.
-- [ ] **F5 PWA + impresión + tema** — manifest, sw, `@media print` solo hoja, dark mode, foco visible, móvil. DoD: instalable, offline tras primera carga, imprime 1 hoja.
-- [ ] **F6 Verificación final** — correr los 3 pasos de la spec y dejar el resultado en `docs/specs/reviews/verificacion.md` (árbol, comandos, salida).
+- [x] **F2 Documento** — `src/docx/*`, `scripts/embed-logo.mjs`, `scripts/test-docx.mjs`, `js/logo-data.js`. DoD: `out/ejemplo.docx` abre en Word/LibreOffice; PDF = 1 página; funciona con logo y con `logo = null` (A14); propiedades de 02 §6 presentes.
+- [x] **F3 Estado** — `state/reducer.js`, `state/useProforma.js`, `platform/storage.js`. DoD: recargar no pierde datos; Nueva proforma cumple spec §6 y 02 §5 (counter, validaHastaManual); storage corrupto no rompe la app.
+- [x] **F4 UI** — form, `LineasEditor`, `LogoField` + `platform/logo-bw.js`, `Preview`, `Toolbar`, validación con `aria-invalid`, descarga. DoD: vista previa en vivo = .docx; nombre de archivo correcto; logo subido queda en blanco y negro y persiste.
+- [x] **F5 PWA + impresión + tema** — manifest, sw, `@media print` solo hoja, dark mode, foco visible, móvil. DoD: instalable, offline tras primera carga, imprime 1 hoja.
+- [x] **F6 Verificación final** — correr los 3 pasos de la spec y dejar el resultado en `docs/specs/reviews/verificacion.md` (árbol, comandos, salida).
 
 Tras cada fase: commit en `feat/fN-*` → aviso a `cleanCode`.
 
@@ -69,9 +69,9 @@ Handoff → `pr-review` ("feat/fN lista para PR").
 |------|-----|-----------|----|-------|
 | Arquitectura | — | — | — | [x] |
 | F0 | [x] | [x] | [x] | [x] |
-| F1 | [x] | [x] | [ ] | [ ] |
-| F2 | [ ] | [ ] | [ ] | [ ] |
-| F3 | [ ] | [ ] | [ ] | [ ] |
-| F4 | [ ] | [ ] | [ ] | [ ] |
-| F5 | [ ] | [ ] | [ ] | [ ] |
-| F6 | [ ] | [ ] | [ ] | [ ] |
+| F1 | [x] | [x] | [x] | [ ] |
+| F2 | [x] | [x] | [ ] | [ ] |
+| F3 | [x] | [x] | [ ] | [ ] |
+| F4 | [x] | [x] | [ ] | [ ] |
+| F5 | [x] | [x] | [ ] | [ ] |
+| F6 | [x] | [x] | [ ] | [ ] |
