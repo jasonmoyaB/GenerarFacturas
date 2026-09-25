@@ -9,6 +9,7 @@ export function todayISO(now = new Date()) {
 
 /** Suma días en UTC para que no afecten horarios de verano ni la zona local. */
 export function addDays(iso, n) {
+  if (!iso) return ''; // un input date vaciado entrega ""
   const [y, m, d] = iso.split('-').map(Number);
   return new Date(Date.UTC(y, m - 1, d + n)).toISOString().slice(0, 10);
 }

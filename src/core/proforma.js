@@ -18,12 +18,15 @@ import { CLIENTE_VACIO, COMENTARIO_DEFAULT } from './defaults.js';
 /** @typedef {{ ok: boolean, errors: Record<string, string> }} Validation  clave "lineas.<id>.<campo>" o "lineas" */
 
 const DIAS_VALIDEZ = 15;
-// A13: la cantidad admite hasta 2 decimales.
+// A13: cantidad y precio admiten hasta 2 decimales; también rechaza "18.000" (miles) que se leería como 18.
 const MAX_2_DECIMALES = /^-?\d+(?:[.,]\d{1,2})?$/;
+
+// randomUUID solo existe en contexto seguro (https/localhost); por IP de LAN no.
+const nuevoId = () => crypto.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
 /** @returns {Linea} */
 export function lineaVacia() {
-  return { id: crypto.randomUUID(), titulo: '', descripcion: '', cantidad: '1', precio: '' };
+  return { id: nuevoId(), titulo: '', descripcion: '', cantidad: '1', precio: '' };
 }
 
 /** Proforma en blanco con fechas de hoy. @returns {Proforma} */
@@ -66,10 +69,11 @@ function erroresLinea(linea) {
   const cantidad = parseDecimal(linea.cantidad);
   const precio = parseDecimal(linea.precio);
   if (!linea.titulo.trim()) errores.titulo = 'El título es obligatorio.';
-  if (!(cantidad > 0)) errores.cantidad = 'La cantidad debe ser mayor que 0.';
+  if (!(cantidad > 0)) errores.cantidad = 'La cantidad debe ser un número mayor que 0.';
   else if (!MAX_2_DECIMALES.test(linea.cantidad.trim())) errores.cantidad = 'Máximo 2 decimales.';
   if (!linea.precio.trim()) errores.precio = 'El precio es obligatorio.';
   else if (!(precio >= 0)) errores.precio = 'El precio debe ser un número mayor o igual a 0.';
+  else if (!MAX_2_DECIMALES.test(linea.precio.trim())) errores.precio = 'Máximo 2 decimales; escriba sin separador de miles (18000).';
   return errores;
 }
 

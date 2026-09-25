@@ -28,6 +28,7 @@ test('dates: hoy local, sumar días, formato', () => {
   assert.equal(addDays('2026-09-25', 15), '2026-10-10');
   assert.equal(addDays('2026-01-31', 1), '2026-02-01');
   assert.equal(addDays('2026-12-20', 15), '2027-01-04');
+  assert.equal(addDays('', 15), '');
   assert.equal(formatDate('2026-09-25'), '25/09/2026');
 });
 
@@ -66,6 +67,8 @@ test('validate: reglas de líneas', () => {
   assert.ok(con({ cantidad: '1,555' }).errors['lineas.x.cantidad']);
   assert.ok(con({ precio: '' }).errors['lineas.x.precio']);
   assert.ok(con({ precio: '-1' }).errors['lineas.x.precio']);
+  assert.ok(con({ precio: '18.000' }).errors['lineas.x.precio']);
+  assert.ok(con({ precio: '1,999' }).errors['lineas.x.precio']);
   assert.equal(con({ precio: '0' }).ok, true);
   assert.ok(validate({ ...EJEMPLO, lineas: [] }).errors.lineas);
 });
