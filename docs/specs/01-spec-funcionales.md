@@ -80,3 +80,7 @@ react + vite
 Precarga la proforma de ejemplo PROF-2026-001 con 8 servicios de organización de
 Google Drive que sumen ₡300.000,00. Al final dame: árbol de archivos, comandos para
 correrlo (npx serve . o similar) y resultado de la verificación.
+
+# AMPLIACIONES
+
+- Módulo de Clientes (CRUD, búsqueda, elegir y guardar cliente desde la proforma, proformas por cliente): `002-modulo-Clientes/Modulo-Clientes.md`.

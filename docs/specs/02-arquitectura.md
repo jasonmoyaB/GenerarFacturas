@@ -22,6 +22,7 @@ Tareas y flujo entre sesiones: `03-tareas.md`. Estado: **CERRADO** por `arquitec
 | A13 | **Cantidad admite decimales** (coma o punto, máx. 2). Monto = `Math.round(cant × precioCents)`. Se imprime sin ceros sobrantes: `1`, `1,5`. *(ex‑pregunta 3)* | Horas fraccionadas son normales en servicios. | Solo enteros |
 | A14 | Sin `assets/logo.png`: `embed-logo` escribe `export default null` y avisa por consola; **no bloquea**. Con logo `null` la celda izquierda del encabezado queda vacía (docx y preview). *(ex‑pregunta 4)* | Nada de placeholder generado (necesitaría dibujar PNG a mano). El usuario pone su logo o lo sube desde la UI. | Placeholder PNG, bloquear build |
 | A15 | Fechas en **hora local**: `todayISO()` arma `YYYY-MM-DD` con `getFullYear/getMonth/getDate`, nunca `toISOString()`; `addDays` opera con `Date.UTC`. | `toISOString()` en Costa Rica (UTC‑6) devuelve *mañana* después de las 18:00. | Librería de fechas |
+| A16 | **Clientes** (spec `002-modulo-Clientes`): catálogo en `state.clientes` (mismo `useReducer`), persistido en `proforma:clientes`. La proforma **copia** los datos del cliente y guarda `clienteId: string\|null` (snapshot). Vista aparte con pestañas por `useState` en `App`, **sin router**; el área de proforma se oculta con `.vista-oculta` (solo `@media screen`) para que "Imprimir" funcione desde cualquier pestaña. Validadores de storage en `state/validacion.js` (sin React) para probarlos con `node --test`. | Editar el catálogo no debe reescribir proformas emitidas (RC-06); borradores viejos sin `clienteId` siguen siendo válidos (RC-09). | Referencia viva al catálogo; React Router; IndexedDB |
 
 ## 2. Regla de dependencias (capas)
 
@@ -113,11 +114,13 @@ Los typedefs viven en `src/core/proforma.js` (y `ViewModel` en `view-model.js`).
  *   condicion: 'Contado'|'Crédito',
  *   actividad: string,           // '' → se usa emisor.actividad
  *   cliente: Cliente, lineas: Linea[],
+ *   clienteId: string|null,      // A16: cliente del catálogo del que se copiaron los datos; ausente en datos viejos = null
  *   comentario: string, incluye: string, noIncluye: string   // textareas, una viñeta por línea
  * }} Proforma */
 /** @typedef {{ dataUrl: string, width: number, height: number }} Logo
  *  dataUrl SIEMPRE "data:image/png;base64,…" (canvas.toDataURL('image/png') o embed-logo). width/height en px. */
 /** @typedef {{ year: number, seq: number }} Counter   // último consecutivo emitido */
+/** @typedef {Cliente & { id: string, actualizadoEn: string }} ClienteGuardado   // A16, core/clientes.js */
 /** @typedef {{ ok: boolean, errors: Record<string, string> }} Validation
  *  clave "lineas.<id>.titulo" | "lineas.<id>.cantidad" | "lineas.<id>.precio"; valor = mensaje en español.
  *  Además ok=false si no hay ninguna línea (clave "lineas"). */
@@ -155,10 +158,12 @@ Firmas de funciones (`core/`):
 | `createProforma({ numero, hoy, emisor })` | proforma en blanco: una línea vacía (cantidad `"1"`), comentario/incluye/noIncluye default |
 | `nuevaProforma(prev, { numero, hoy, emisor })` | = `createProforma` pero conserva `comentario`, `incluye`, `noIncluye` de `prev` |
 | `toViewModel(proforma, emisor)` | → `ViewModel`. Única función que formatea para imprimir. |
+| `validarCliente(cliente, clientes, id?)` | → `Validation` con claves `nombre`, `cedulaJuridica`, `correo` (spec 002 RC-02..04); `id` excluye al propio cliente de la comparación de cédula |
+| `buscarClientes(clientes, texto)` / `ordenarClientes(clientes)` | filtro por nombre/cédula/contacto sin tildes ni mayúsculas / copia A→Z con `localeCompare('es')` |
 | `logoSize(logo)` | → `{ width, height }` px: ancho 140, alto proporcional; si alto > 90 → alto 90 y ancho proporcional. Usada por docx **y** Preview. |
 
 Estado persistido (`localStorage`, prefijo `proforma:`): `emisor` (Emisor), `logo` (Logo | ausente → `js/logo-data.js`),
-`counter` (Counter), `draft` (Proforma). Toda lectura pasa por `load(key, fallback)`: JSON inválido → `fallback`.
+`counter` (Counter), `draft` (Proforma), `history`, `clientes` (ClienteGuardado[], A16). Toda lectura pasa por `load(key, fallback)`: JSON inválido → `fallback`.
 
 ## 5. Reglas de negocio clave
 

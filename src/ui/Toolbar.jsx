@@ -1,23 +1,28 @@
 import { useState } from 'react';
 import { Packer } from 'docx';
 import { todayISO } from '../core/dates.js';
-import { fileName, validate } from '../core/proforma.js';
+import { fileName, nuevoId, validate } from '../core/proforma.js';
 import { toViewModel } from '../core/view-model.js';
 import { buildDocument } from '../docx/build-document.js';
 import { downloadBlob } from '../platform/download.js';
 
-export default function Toolbar({ state, dispatch }) {
+const VISTAS = [['proforma', 'Proforma'], ['clientes', 'Clientes']];
+
+export default function Toolbar({ state, dispatch, vista, onVista, guardadoOk }) {
   const [busy, setBusy] = useState(false);
   function valid() {
     const result = validate(state.proforma);
     dispatch({ type: 'errores', errors: result.errors });
-    if (!result.ok) requestAnimationFrame(() => document.querySelector('[aria-invalid="true"]')?.focus());
+    if (!result.ok) {
+      onVista('proforma'); // el campo inválido debe estar visible para recibir el foco
+      requestAnimationFrame(() => document.querySelector('[aria-invalid="true"]')?.focus());
+    }
     return result.ok;
   }
   function saveToHistory() {
     dispatch({
       type: 'historial/guardar',
-      id: globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`,
+      id: nuevoId(),
       savedAt: new Date().toISOString(),
     });
   }
@@ -48,6 +53,12 @@ export default function Toolbar({ state, dispatch }) {
         <button type="button" className="secondary" onClick={print}>Imprimir / PDF</button>
         <button type="button" className="primary" disabled={busy} onClick={download}>{busy ? 'Generando…' : 'Descargar .docx'}</button>
       </div>
+      <nav className="tabs" aria-label="Secciones">
+        {VISTAS.map(([id, label]) => (
+          <button key={id} type="button" aria-pressed={vista === id} onClick={() => onVista(id)}>{label}</button>
+        ))}
+      </nav>
+      {!guardadoOk && <p className="save-warning" role="alert">No se pudo guardar en este navegador. Los cambios se conservan mientras la página siga abierta.</p>}
     </header>
   );
 }

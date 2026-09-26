@@ -47,6 +47,7 @@ export const EJEMPLO = {
     correo: 'maria@losandes.cr',
     direccion: 'San José, Costa Rica',
   },
+  clienteId: null,
   lineas: SERVICIOS_EJEMPLO.map(([titulo, descripcion, precio], i) => ({
     id: `ejemplo-${i + 1}`,
     titulo,

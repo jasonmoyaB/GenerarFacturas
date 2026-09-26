@@ -7,6 +7,8 @@ import { createProforma, nuevaProforma, lineAmount, total, validate, fileName } 
 import { toViewModel, logoSize } from '../src/core/view-model.js';
 import { EMISOR_DEFAULT, EJEMPLO } from '../src/core/defaults.js';
 import { reducer } from '../src/state/reducer.js';
+import { validarCliente, buscarClientes, ordenarClientes } from '../src/core/clientes.js';
+import { validProforma, validHistory, validClientes } from '../src/state/validacion.js';
 
 const linea = (o) => ({ id: 'x', titulo: 'Algo', descripcion: '', cantidad: '1', precio: '100', ...o });
 
@@ -122,6 +124,7 @@ test('reducer: fechas, edición y nueva proforma', () => {
   assert.equal(nueva.proforma.numero, 'PROF-2026-002');
   assert.equal(nueva.proforma.validaHastaManual, false);
   assert.equal(nueva.proforma.cliente.nombre, '');
+  assert.equal(nueva.proforma.clienteId, null);
   assert.deepEqual(nueva.errors, {});
 });
 
@@ -146,4 +149,95 @@ test('reducer: historial guarda, actualiza, restaura y elimina', () => {
   const restored = reducer({ ...updated, proforma: { ...EJEMPLO, numero: 'OTRA' } }, { type: 'historial/restaurar', record: updated.history[0] });
   assert.equal(restored.proforma.numero, 'PROF-2026-001');
   assert.equal(reducer(restored, { type: 'historial/eliminar', id: 'h1' }).history.length, 0);
+});
+
+const cli = (o) => ({ ...EJEMPLO.cliente, id: 'c1', actualizadoEn: '2026-09-25T10:00:00.000Z', ...o });
+
+test('validarCliente: nombre, cédula única y correo', () => {
+  assert.equal(validarCliente(cli({ nombre: '   ' }), []).errors.nombre, 'El nombre es obligatorio.');
+  const existentes = [cli({ cedulaJuridica: '3-101-123456' })];
+  const duplicado = validarCliente(cli({ id: 'c2', cedulaJuridica: '3101123456' }), existentes, 'c2');
+  assert.match(duplicado.errors.cedulaJuridica, /La cédula jurídica ya está registrada/);
+  assert.equal(validarCliente(cli({ cedulaJuridica: ' 3 101 123456 ' }), existentes).ok, false);
+  assert.equal(validarCliente(existentes[0], existentes, 'c1').ok, true, 'editar sin cambiar la cédula');
+  assert.equal(validarCliente(cli({ cedulaJuridica: '' }), [cli({ cedulaJuridica: '' })]).ok, true, 'cédula vacía no se compara');
+  assert.ok(validarCliente(cli({ correo: 'maria@' }), []).errors.correo);
+  assert.equal(validarCliente(cli({ correo: '' }), []).ok, true);
+});
+
+test('buscarClientes y ordenarClientes', () => {
+  const clientes = [
+    cli({ id: 'a', nombre: 'Los Andes', cedulaJuridica: '3-101-123456', contacto: 'María Fernández' }),
+    cli({ id: 'b', nombre: 'Café Ñandú', cedulaJuridica: '3-102-999999', contacto: 'Pedro' }),
+    cli({ id: 'c', nombre: 'Álvaro Mora', cedulaJuridica: '', contacto: '' }),
+  ];
+  assert.deepEqual(buscarClientes(clientes, 'cafe nandu').map((c) => c.id), ['b']);
+  assert.deepEqual(buscarClientes(clientes, '3-101').map((c) => c.id), ['a']);
+  assert.deepEqual(buscarClientes(clientes, 'maria').map((c) => c.id), ['a']);
+  assert.equal(buscarClientes(clientes, '  ').length, 3);
+  assert.deepEqual(ordenarClientes(clientes).map((c) => c.id), ['c', 'b', 'a']);
+  assert.equal(clientes[0].id, 'a', 'no muta la lista original');
+});
+
+test('validacion: borradores sin clienteId y clientes corruptos (CA-17, CA-18)', () => {
+  const { clienteId, ...viejo } = EJEMPLO;
+  assert.equal(clienteId, null);
+  assert.ok(validProforma(viejo), 'borrador anterior al módulo, sin clienteId');
+  assert.ok(validProforma({ ...viejo, clienteId: null }));
+  assert.ok(validProforma({ ...viejo, clienteId: 'c1' }));
+  assert.ok(!validProforma({ ...viejo, clienteId: 5 }));
+  const record = { id: 'h1', savedAt: '2026-09-25T10:00:00Z', proforma: viejo, emisor: EMISOR_DEFAULT };
+  assert.equal(validHistory([record]).length, 1);
+  assert.deepEqual(validClientes('{roto'), []);
+  const cargados = validClientes([cli(), null, cli({ id: undefined }), cli({ id: 'x', nombre: '  ' }), { ...cli({ id: 'y' }), extra: '<b>' }, cli({ nombre: 'Repetido' })]);
+  assert.deepEqual(cargados.map((c) => c.id), ['c1', 'y']);
+  assert.equal('extra' in cargados[1], false);
+});
+
+test('reducer: catálogo de clientes y vínculo con la proforma', () => {
+  const base = {
+    proforma: { ...EJEMPLO, clienteId: null },
+    emisor: EMISOR_DEFAULT,
+    counter: { year: 2026, seq: 1 },
+    logo: null,
+    logoCustom: false,
+    history: [],
+    clientes: [],
+    errors: { 'cliente.nombre': 'x', 'lineas.1.titulo': 'y' },
+  };
+  const conCliente = reducer(base, { type: 'clientes/guardar', cliente: cli({ nombre: 'Café Ñandú', telefono: '1111' }) });
+  assert.equal(conCliente.clientes.length, 1);
+  assert.equal(conCliente.proforma, base.proforma, 'guardar en el catálogo no toca la proforma');
+
+  const usado = reducer(conCliente, { type: 'proforma/usarCliente', cliente: conCliente.clientes[0] });
+  assert.equal(usado.proforma.clienteId, 'c1');
+  assert.equal(usado.proforma.cliente.nombre, 'Café Ñandú');
+  assert.equal('id' in usado.proforma.cliente, false, 'solo se copian los 6 campos');
+  assert.deepEqual(usado.errors, { 'lineas.1.titulo': 'y' });
+
+  const editado = reducer(usado, { type: 'clientes/guardar', cliente: cli({ nombre: 'Café Ñandú', telefono: '2222' }) });
+  assert.equal(editado.clientes.length, 1);
+  assert.equal(editado.proforma.cliente.telefono, '1111', 'RC-06: el borrador conserva la copia');
+
+  const guardadoHist = reducer(usado, { type: 'historial/guardar', id: 'h1', savedAt: '2026-09-25T10:00:00Z' });
+  assert.equal(guardadoHist.history[0].proforma.clienteId, 'c1');
+  const eliminado = reducer(guardadoHist, { type: 'clientes/eliminar', id: 'c1' });
+  assert.equal(eliminado.clientes.length, 0);
+  assert.equal(eliminado.proforma.clienteId, null);
+  assert.equal(eliminado.proforma.cliente.nombre, 'Café Ñandú');
+  assert.equal(eliminado.history, guardadoHist.history, 'RC-11: el historial no cambia');
+
+  const creado = reducer(base, { type: 'proforma/guardarCliente', id: 'n1', actualizadoEn: '2026-09-25T11:00:00.000Z' });
+  assert.equal(creado.proforma.clienteId, 'n1');
+  assert.equal(creado.clientes[0].nombre, EJEMPLO.cliente.nombre);
+  const cambiado = reducer(creado, { type: 'cliente/campo', name: 'telefono', value: '7777' });
+  assert.equal(cambiado.clientes[0].telefono, EJEMPLO.cliente.telefono, 'RC-07: editar la proforma no cambia el catálogo');
+  const actualizado = reducer(cambiado, { type: 'proforma/guardarCliente', id: 'n1', actualizadoEn: '2026-09-25T12:00:00.000Z' });
+  assert.equal(actualizado.clientes.length, 1);
+  assert.equal(actualizado.clientes[0].telefono, '7777');
+  assert.equal(actualizado.clientes[0].actualizadoEn, '2026-09-25T12:00:00.000Z');
+
+  const { clienteId, ...viejo } = EJEMPLO;
+  const restaurado = reducer(base, { type: 'historial/restaurar', record: { proforma: viejo, emisor: EMISOR_DEFAULT } });
+  assert.equal(restaurado.proforma.clienteId, null);
 });

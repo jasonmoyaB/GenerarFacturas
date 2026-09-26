@@ -2,6 +2,7 @@
 import { parseDecimal, toCents } from './money.js';
 import { addDays } from './dates.js';
 import { CLIENTE_VACIO, COMENTARIO_DEFAULT } from './defaults.js';
+import { sinTildes } from './clientes.js';
 
 /** @typedef {{ nombre: string, cedula: string, ciudad: string, direccion: string, telefono: string, correo: string, actividad: string }} Emisor */
 /** @typedef {{ nombre: string, cedulaJuridica: string, contacto: string, telefono: string, correo: string, direccion: string }} Cliente */
@@ -10,9 +11,9 @@ import { CLIENTE_VACIO, COMENTARIO_DEFAULT } from './defaults.js';
 /** @typedef {{
  *   numero: string, fechaEmision: string, validaHasta: string, validaHastaManual: boolean,
  *   condicion: 'Contado'|'Crédito', actividad: string,
- *   cliente: Cliente, lineas: Linea[],
+ *   cliente: Cliente, clienteId: string|null, lineas: Linea[],
  *   comentario: string, incluye: string, noIncluye: string
- * }} Proforma */
+ * }} Proforma  clienteId: cliente del catálogo del que se copiaron los datos (spec 002, RC-05/RC-09). */
 /** @typedef {{ dataUrl: string, width: number, height: number }} Logo  dataUrl siempre "data:image/png;base64,…" */
 /** @typedef {{ year: number, seq: number }} Counter  último consecutivo emitido */
 /** @typedef {{ ok: boolean, errors: Record<string, string> }} Validation  clave "lineas.<id>.<campo>" o "lineas" */
@@ -22,7 +23,7 @@ const DIAS_VALIDEZ = 15;
 const MAX_2_DECIMALES = /^-?\d+(?:[.,]\d{1,2})?$/;
 
 // randomUUID solo existe en contexto seguro (https/localhost); por IP de LAN no.
-const nuevoId = () => crypto.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+export const nuevoId = () => crypto.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
 /** @returns {Linea} */
 export function lineaVacia() {
@@ -39,6 +40,7 @@ export function createProforma({ numero, hoy, emisor }) {
     condicion: 'Contado',
     actividad: emisor.actividad,
     cliente: { ...CLIENTE_VACIO },
+    clienteId: null,
     lineas: [lineaVacia()],
     comentario: COMENTARIO_DEFAULT,
     incluye: '',
@@ -89,9 +91,7 @@ export function validate(proforma) {
 
 /** "Café Ñandú S.A." → "Cafe_Nandu_SA"; vacío → "Cliente". */
 function nombreSeguro(texto) {
-  const limpio = texto
-    .normalize('NFD')
-    .replace(/\p{Diacritic}/gu, '')
+  const limpio = sinTildes(texto)
     .replace(/[^A-Za-z0-9 ]/g, '')
     .replace(/ +/g, ' ')
     .trim();

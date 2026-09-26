@@ -39,6 +39,7 @@ Orden por riesgo: el .docx (F2) va temprano porque es lo más difícil de dejar 
 - [x] **F4 UI** — form, `LineasEditor`, `LogoField` + `platform/logo-bw.js`, `Preview`, `Toolbar`, validación con `aria-invalid`, descarga. DoD: vista previa en vivo = .docx; nombre de archivo correcto; logo subido queda en blanco y negro y persiste.
 - [x] **F5 PWA + impresión + tema** — manifest, sw, `@media print` solo hoja, dark mode, foco visible, móvil. DoD: instalable, offline tras primera carga, imprime 1 hoja.
 - [x] **F6 Verificación final** — correr los 3 pasos de la spec y dejar el resultado en `docs/specs/reviews/verificacion.md` (árbol, comandos, salida).
+- [x] **F7 Clientes** — spec y plan en `002-modulo-Clientes/`. `core/clientes.js`, `state/validacion.js`, acciones de clientes en el reducer, vista `ui/clientes/Clientes.jsx`, selector y "Guardar en clientes" en `ClienteFields`. DoD y verificación en navegador: `reviews/f7.md`.
 
 Tras cada fase: commit en `feat/fN-*` → aviso a `cleanCode`.
 
@@ -75,3 +76,4 @@ Handoff → `pr-review` ("feat/fN lista para PR").
 | F4 | [x] | [x] | [ ] | [ ] |
 | F5 | [x] | [x] | [ ] | [ ] |
 | F6 | [x] | [x] | [ ] | [ ] |
+| F7 | [x] | [ ] | [ ] | [ ] |
