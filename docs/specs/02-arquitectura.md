@@ -111,7 +111,7 @@ Los typedefs viven en `src/core/proforma.js` (y `ViewModel` en `view-model.js`).
  *   fechaEmision: string,        // ISO "YYYY-MM-DD"
  *   validaHasta: string,         // ISO
  *   validaHastaManual: boolean,
- *   condicion: 'Contado'|'Crédito',
+ *   condicion: string,            // texto libre; "Contado" por defecto
  *   actividad: string,           // '' → se usa emisor.actividad
  *   cliente: Cliente, lineas: Linea[],
  *   clienteId: string|null,      // A16: cliente del catálogo del que se copiaron los datos; ausente en datos viejos = null
@@ -167,8 +167,10 @@ Estado persistido (`localStorage`, prefijo `proforma:`): `emisor` (Emisor), `log
 
 ## 5. Reglas de negocio clave
 
-- **Válida hasta** = emisión + 15 días; se recalcula al cambiar emisión **salvo** `validaHastaManual === true`
-  (pasa a `true` al editar "Válida hasta" a mano; "Nueva proforma" lo resetea a `false`).
+- **Válida hasta** = emisión + 15 días cuando `validaHastaManual === false`; el checkbox activa el modo manual
+  sin cambiar la fecha existente. Al desactivarlo, descarta la fecha manual y recalcula emisión + 15 días.
+  "Nueva proforma" restablece `validaHastaManual = false`.
+- **Condición de venta**: texto libre; el valor predeterminado de una nueva proforma es `Contado`.
 - **Actividad**: vacía → view‑model usa la del emisor. "Nueva proforma" la deja = `emisor.actividad`.
 - **Consecutivo**: primera carga sin `draft` → `EJEMPLO` (PROF‑2026‑001, fecha = hoy) y `counter = {year: 2026, seq: 1}`.
   "Nueva proforma" → `counter = nextCounter(counter, añoActual)` y `numero = formatNumero(counter)`.

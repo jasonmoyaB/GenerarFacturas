@@ -128,6 +128,58 @@ test('reducer: fechas, edición y nueva proforma', () => {
   assert.deepEqual(nueva.errors, {});
 });
 
+test('reducer: controla la edición manual de Válida hasta', () => {
+  const base = {
+    proforma: {
+      ...EJEMPLO,
+      fechaEmision: '2026-09-25',
+      validaHasta: '2026-10-10',
+      validaHastaManual: false,
+    },
+  };
+
+  const activada = reducer(base, { type: 'proforma/validaHastaManual', value: true });
+  assert.equal(activada.proforma.validaHastaManual, true);
+  assert.equal(activada.proforma.validaHasta, '2026-10-10');
+
+  const editada = reducer(activada, { type: 'proforma/validaHasta', value: '2026-12-01' });
+  assert.equal(editada.proforma.validaHasta, '2026-12-01');
+  const nuevaEmisionManual = reducer(editada, { type: 'proforma/campo', name: 'fechaEmision', value: '2026-11-01' });
+  assert.equal(nuevaEmisionManual.proforma.validaHasta, '2026-12-01');
+
+  const desactivada = reducer(nuevaEmisionManual, { type: 'proforma/validaHastaManual', value: false });
+  assert.equal(desactivada.proforma.validaHastaManual, false);
+  assert.equal(desactivada.proforma.validaHasta, '2026-11-16');
+
+  const nuevaEmisionAutomatica = reducer(desactivada, { type: 'proforma/campo', name: 'fechaEmision', value: '2026-11-10' });
+  assert.equal(nuevaEmisionAutomatica.proforma.validaHasta, '2026-11-25');
+});
+
+test('reducer: conserva una condición personalizada en las salidas y Nueva proforma la restablece', () => {
+  const base = {
+    proforma: { ...EJEMPLO, condicion: 'Contado' },
+    emisor: EMISOR_DEFAULT,
+    counter: { year: 2026, seq: 1 },
+    errors: {},
+  };
+  const personalizada = reducer(base, {
+    type: 'proforma/campo',
+    name: 'condicion',
+    value: '50% anticipo y saldo contra entrega',
+  });
+  assert.equal(personalizada.proforma.condicion, '50% anticipo y saldo contra entrega');
+  assert.equal(toViewModel(personalizada.proforma, EMISOR_DEFAULT).condicion, '50% anticipo y saldo contra entrega');
+
+  const manual = {
+    ...personalizada,
+    proforma: { ...personalizada.proforma, validaHastaManual: true, validaHasta: '2026-12-31' },
+  };
+  const nueva = reducer(manual, { type: 'nueva', hoy: '2026-10-01' });
+  assert.equal(nueva.proforma.condicion, 'Contado');
+  assert.equal(nueva.proforma.validaHastaManual, false);
+  assert.equal(nueva.proforma.validaHasta, '2026-10-16');
+});
+
 test('reducer: historial guarda, actualiza, restaura y elimina', () => {
   const base = {
     proforma: EJEMPLO,

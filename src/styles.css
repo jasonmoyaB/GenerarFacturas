@@ -62,8 +62,12 @@ button, .file-button { border: 0; border-radius: 3px; padding: 10px 15px; font-w
 .field { min-width: 0; display: flex; flex-direction: column; gap: 6px; color: #3d4a47; font-size: 12px; font-weight: 700; }
 .field input, .field textarea, .field select { width: 100%; min-height: 41px; padding: 9px 10px; color: #17231f; background: var(--paper); border: 1px solid #b9beb9; border-radius: 2px; font-size: 14px; font-weight: 400; }
 .field textarea { resize: vertical; }
+.field input:disabled { cursor: not-allowed; opacity: .65; }
 .field [aria-invalid="true"] { border-color: var(--danger); box-shadow: 0 0 0 1px var(--danger); }
 .field-error { color: var(--danger); font-size: 12px; }
+.date-field { min-width: 0; display: grid; gap: 8px; }
+.checkbox-field { display: flex; align-items: center; gap: 7px; color: #3d4a47; font-size: 12px; font-weight: 700; cursor: pointer; }
+.checkbox-field input { width: 16px; height: 16px; margin: 0; accent-color: var(--text-accent); }
 details summary { display: flex; align-items: baseline; justify-content: space-between; color: var(--text-accent); cursor: pointer; }
 details summary span { font-family: Georgia, serif; font-size: 20px; font-weight: 700; }
 details summary small { color: var(--muted); }
@@ -174,6 +178,7 @@ details summary small { color: var(--muted); }
 @media (prefers-color-scheme: dark) {
   :root { color: #e5ebe8; background: #111815; --text-accent: #f2c66d; --panel: #1a2420; --paper: #202c27; --line: #3d4a45; --muted: #aeb9b5; --danger: #ff9b8f; }
   .field { color: #d3ddd9; }
+  .checkbox-field { color: #d3ddd9; }
   .field input, .field textarea, .field select { color: #f3f6f4; border-color: #53615b; }
   .secondary { color: #e5ebe8; background: #26332e; border-color: #53615b; }
   .secondary:hover { background: #32423b; }

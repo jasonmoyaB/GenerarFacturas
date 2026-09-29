@@ -10,7 +10,7 @@ import { sinTildes } from './clientes.js';
  *  cantidad/precio = texto crudo del input ("1,5", "18000"); se convierten al calcular. */
 /** @typedef {{
  *   numero: string, fechaEmision: string, validaHasta: string, validaHastaManual: boolean,
- *   condicion: 'Contado'|'Crédito', actividad: string,
+ *   condicion: string, actividad: string,
  *   cliente: Cliente, clienteId: string|null, lineas: Linea[],
  *   comentario: string, incluye: string, noIncluye: string
  * }} Proforma  clienteId: cliente del catálogo del que se copiaron los datos (spec 002, RC-05/RC-09). */

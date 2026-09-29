@@ -22,6 +22,12 @@ export function reducer(state, action) {
     }
     case 'proforma/validaHasta':
       return { ...state, proforma: { ...state.proforma, validaHasta: action.value, validaHastaManual: true } };
+    case 'proforma/validaHastaManual':
+      return { ...state, proforma: {
+        ...state.proforma,
+        validaHastaManual: action.value,
+        validaHasta: action.value ? state.proforma.validaHasta : addDays(state.proforma.fechaEmision, 15),
+      } };
     case 'emisor/campo':
       return { ...state, emisor: { ...state.emisor, [action.name]: action.value } };
     case 'cliente/campo':

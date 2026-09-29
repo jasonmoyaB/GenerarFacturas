@@ -9,9 +9,9 @@ react + vite
 # ESPECIFICACIONES FUNCIONALES
 1. Formulario:
    a) Documento: número PROF-AAAA-NNN autogenerado (consecutivo en localStorage,
-      editable), fecha de emisión (hoy por defecto) y "Válida hasta" (+15 días,
-      recalculada al cambiar la emisión salvo que la haya editado a mano).
-      Condición de venta: select Contado / Crédito (Contado por defecto).
+      editable), fecha de emisión (hoy por defecto) y "Válida hasta" (+15 días).
+      Un checkbox activa su edición manual; al desactivarlo se restaura de inmediato
+      emisión + 15 días. Condición de venta: texto libre (Contado por defecto).
       Actividad (lo que se hará): campo por proforma; si queda vacío usa la
       actividad del emisor. "Nueva proforma" lo reinicia a la del emisor.
    b) Emisor (guardado en localStorage, sección plegable): nombre, cédula, ciudad,
