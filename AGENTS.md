@@ -240,6 +240,7 @@ git diff --check
 
 Además:
 
+- TDD obligatorio: toda lógica nueva o corregida lleva su prueba unitaria (`node:test` en `tests/`) escrita primero y vista en rojo antes de implementar; al cerrar la implementación, cada prueba nueva debe pasar en verde. Sin prueba = tarea no terminada.
 - Probar el flujo modificado en navegador cuando afecte UI, storage, descarga, impresión o service worker.
 - Verificar tema claro, oscuro y ancho móvil si se cambia CSS.
 - Verificar `aria-invalid`, foco y navegación por teclado si se cambian formularios.

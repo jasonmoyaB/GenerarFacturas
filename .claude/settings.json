@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "in=$(cat); [ \"$(printf '%s' \"$in\" | jq -r '.stop_hook_active')\" = \"true\" ] && exit 0; [ -z \"$(git status --porcelain -- src tests scripts js)\" ] && exit 0; out=$(npm test 2>&1) || { printf '%s\\n' \"$out\" | tail -40 >&2; echo 'TDD (AGENTS.md §12): npm test en rojo. Arregla o escribe la prueba unitaria antes de terminar.' >&2; exit 2; }",
+            "shell": "bash",
+            "timeout": 120,
+            "statusMessage": "TDD: npm test"
+          }
+        ]
+      }
+    ]
+  }
+}
